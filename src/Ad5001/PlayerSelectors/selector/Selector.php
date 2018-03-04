@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ad5001\PlayerSelectors\selector;
@@ -15,9 +16,9 @@ abstract class Selector {
      */
     const DEFAULT_PARAMS = [
         // Coordinates of the center, will be modified if player in command
-        "x" => 0, 
-        "y" => 0, 
-        "z" => 0, 
+        "x" => 0,
+        "y" => 0,
+        "z" => 0,
         "lvl" => "", // The world to search in. Defaults to the current world in case of console, current world in the case of a player
         // Search by coordinates
         "dx" => 0, // Distance from the center in x (0 = no limit)
@@ -44,7 +45,7 @@ abstract class Selector {
     protected $name;
     protected $selectorChar;
     protected $acceptModifiers;
-    
+
     /**
      * Defines base for a selector
      *
@@ -57,7 +58,7 @@ abstract class Selector {
         $this->selectorChar = $selectorChar;
         $this->acceptModifiers = $acceptModifiers;
     }
-    
+
     /**
      * Returns the name of the selector. E.g: "All players", "Entities", ...
      *
@@ -66,7 +67,7 @@ abstract class Selector {
     public function getName(): string{
         return $this->name;
     }
-        
+
     /**
      * Returns the character of the selector. What should be after the "@" to use this selector
      *
@@ -75,7 +76,7 @@ abstract class Selector {
     public function getSelectorChar(): string{
         return $this->selectorChar;
     }
-    
+
     /**
      * Should the selector accept modifiers? If false, arguments used in commands will be ignored. Can save alot of performances.
      *
@@ -102,7 +103,7 @@ abstract class Selector {
      * @param array $params
      * @return bool
      */
-    public function checkDefaultParams(Entity $et, array $params): bool{ 
+    public function checkDefaultParams(Entity $et, array $params): bool{
         $dist = sqrt($et->distanceSquared(new Vector3($params["x"], $params["y"], $params["z"])));
         if(($params["r"] !== 0 && $dist > $params["r"]) || $dist < $params["rm"]) return false; // Not in range
         if($params["dx"] !== 0 && abs($et->x - $params["x"]) > $params["dx"]); // Not in x range
@@ -112,7 +113,7 @@ abstract class Selector {
         if($params["rx"] < $et->getPitch() || $et->getPitch() < $params["rxm"]) return false; // Not in range pitch
         if($params["ry"] < $et->getYaw() || $et->getYaw() < $params["rym"]) return false; // Not in range yaw
         if($et instanceof Player && ($et->getXpLevel() > $params["l"] || $et->getXpLevel() < $params["lm"])) return false; // Not in range XP
-        if($params["name"] !== "" && (($et instanceof Player && $et->getDisplayName() !== $params["name"]) || 
+        if($params["name"] !== "" && (($et instanceof Player && $et->getDisplayName() !== $params["name"]) ||
             (!($et instanceof Player) && $et->getNameTag() !== $params["name"]))) return false; // Not selected name
         // Entity type
         $etClassName = explode("\\", get_class($et))[count(explode("\\", get_class($et))) - 1];

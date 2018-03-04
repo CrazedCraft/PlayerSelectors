@@ -1,12 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ad5001\PlayerSelectors;
 
 use pocketmine\plugin\PluginBase;
 use pocketmine\event\Listener;
-use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\command\CommandSender;
 use pocketmine\event\player\PlayerCommandPreprocessEvent;
 use pocketmine\event\server\ServerCommandEvent;
@@ -40,8 +39,8 @@ class Main extends PluginBase implements Listener {
         self::registerSelector(new Entities());
         self::registerSelector(new SelfSelector());
     }
-    
-    
+
+
     /**
      * When a command is executed, check for selectors
      *
@@ -53,12 +52,12 @@ class Main extends PluginBase implements Listener {
         $m = substr($event->getMessage(), 1);
         if(substr($event->getMessage(), 0, 1) == "/" && $this->execSelectors($m, $event->getPlayer())) $event->setCancelled();
     }
-        
-        
+
+
     /**
      * When a command is executed, check for selectors
      *
-     * @param PlayerCommandPreProcessEvent $event
+     * @param ServerCommandEvent $event
      * @priority HIGHEST
      * @return void
      */
@@ -83,14 +82,14 @@ class Main extends PluginBase implements Listener {
                 $params = self::$selectors[$matches[1][$index]]->acceptsModifiers() ? $this->checkArgParams($matches, $index): [];
                 // Applying the selector
                 $newCommandsToExecute = [];
-                foreach($commandsToExecute as $index => $cmd){
+                foreach($commandsToExecute as $i => $cmd){
                     // Foreaching the returning commands to push them to the new commands to be executed at the next run.
-                    foreach(self::$selectors[$matches[1][$index]]->applySelector($sender, $params) as $selectorStr){
+                    foreach(self::$selectors[$matches[1][$i]]->applySelector($sender, $params) as $selectorStr){
                         if(strpos($selectorStr, " ") !== -1) $selectorStr = explode(" ", $selectorStr)[count(explode(" ", $selectorStr)) - 1]; // Name w/ spaces. Match the nearest name in the player. Not perfect :/
                         $newCommandsToExecute[] = substr_replace($cmd, " " . $selectorStr . " ", strpos($cmd, $match), strlen($match));
                     }
                     if(count($newCommandsToExecute) == 0) {
-                        $sender->sendMessage("§cYour selector $match (" . self::$selectors[$matches[1][$index]]->getName() . ") did not mactch any player/entity.");
+                        $sender->sendMessage("§cYour selector $match (" . self::$selectors[$matches[1][$i]]->getName() . ") did not match any players or entities.");
                         return true;
                     }
                 }
@@ -109,14 +108,14 @@ class Main extends PluginBase implements Listener {
      * Return all the params in an array form in a match.
      *
      * @param array $match
-     * @return void
+     * @return array
      */
     public function checkArgParams(array $match, int $index): array{
         $params = [];
         if(strlen($match[2][$index]) !== 0){ // Is there any command parameter?
             if(strpos($match[3][$index], ",") !== -1){ // Is there multiple arguments
                 foreach(explode(",", $match[3][$index]) as $param){
-                    // Param here is in form argName=argproperty. 
+                    // Param here is in form argName=argproperty.
                     // Parsing it to put it into the $params
                     $parts = explode("=", $param);
                     $params[$parts[0]] = $parts[1];
@@ -138,18 +137,18 @@ class Main extends PluginBase implements Listener {
      * @return string
      */
     public function buildRegExr(): string {
-        $regexr = "/ @("; // Space is to check that it's an argument on it's own and not a part of one 
+        $regexr = "/ @("; // Space is to check that it's an argument on it's own and not a part of one
         // Adding the selectors
         $regexr .= preg_replace("/(\\$|\\(|\\)|\\^|\\[|\\])/", "\\\\$1", // Always parse input we don't trust!
             implode("|", array_keys(self::$selectors))
-        ); 
+        );
         // Adding the arguments
         $regexr .= ")(\\[(((\w+)?=(.)+(,)?){1,})\\])?";
         // Closing the regexr
         $regexr .= "( |$)/"; // Space is to check that it's an argument on it's own and not a part of one (cf twitter accounts would we used with @+some letters)
         return $regexr;
     }
-    
+
     /**
      * Registers a selector
      *
@@ -159,7 +158,7 @@ class Main extends PluginBase implements Listener {
     public static function registerSelector(Selector $sel): void{
         self::$selectors[$sel->getSelectorChar()] = $sel;
     }
-        
+
     /**
      * Unregisters a selector
      *

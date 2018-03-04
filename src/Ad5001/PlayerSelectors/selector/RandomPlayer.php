@@ -1,6 +1,6 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ad5001\PlayerSelectors\selector;
 
@@ -11,13 +11,13 @@ use pocketmine\level\Position;
 
 
 class RandomPlayer extends Selector{
-    
+
     public function __construct(){
         parent::__construct("Random player", "r", true);
     }
 
     /**
-     * Executes the selector. 
+     * Executes the selector.
      * Documentation is in the Selector.php file.
      *
      * @param CommandSender $sender

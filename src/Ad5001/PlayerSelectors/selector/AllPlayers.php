@@ -9,15 +9,14 @@ use pocketmine\Server;
 use pocketmine\Player;
 use pocketmine\level\Position;
 
-
 class AllPlayers extends Selector{
-    
+
     public function __construct(){
         parent::__construct("All players", "a", true);
     }
 
     /**
-     * Executes the selector. 
+     * Executes the selector.
      * Documentation is in the Selector.php file.
      *
      * @param CommandSender $sender
